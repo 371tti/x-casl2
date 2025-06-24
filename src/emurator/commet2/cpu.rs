@@ -59,3 +59,37 @@ impl CPU {
         }
     }
 }
+
+impl CPUExecution for CPU {
+    type UpdateNotify = UpdateNotify;
+    
+    fn init(&mut self, mode: InitMode) {
+        todo!()
+    }
+    
+    fn execute_fetch(&mut self) -> Self::UpdateNotify {
+        todo!()
+    }
+    
+    fn execute_decode(&mut self) -> Self::UpdateNotify {
+        todo!()
+    }
+    
+    fn execute_addr_gen(&mut self) -> Self::UpdateNotify {
+        todo!()
+    }
+    
+    fn execute_execute(&mut self) -> Self::UpdateNotify {
+        todo!()
+    }
+    
+    fn commet2_step(&mut self) -> Self::UpdateNotify {
+        todo!()
+    }
+    
+    fn castle_step(&mut self) -> Self::UpdateNotify {
+        todo!()
+    }
+
+    
+}

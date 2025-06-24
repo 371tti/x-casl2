@@ -55,3 +55,48 @@ pub mod instruction {
         pub const SVC: u8 = 0xF0;
     }
 }
+
+pub fn opecode_to_4char(opcode: u8) -> [char; 4] {
+    let chars = match opcode {
+        instruction::w1::NOP => ['N', 'O', 'P', ' '],
+        instruction::w1::LD => ['L', 'D', ' ', ' '],
+        instruction::w1::ADDA => ['A', 'D', 'D', 'A'],
+        instruction::w1::SUBA => ['S', 'U', 'B', 'A'],
+        instruction::w1::ADDL => ['A', 'D', 'D', 'L'],
+        instruction::w1::SUBL => ['S', 'U', 'B', 'L'],
+        instruction::w1::AND => ['A', 'N', 'D', ' '],
+        instruction::w1::OR => ['O', 'R', ' ', ' '],
+        instruction::w1::XOR => ['X', 'O', 'R', ' '],
+        instruction::w1::CPA => ['C', 'P', 'A', ' '],
+        instruction::w1::CPL => ['C', 'P', 'L', ' '],
+        instruction::w1::POP => ['P', 'O', 'P', ' '],
+        instruction::w1::RET => ['R', 'E', 'T', ' '],
+        instruction::w2::LD => ['L', 'D', ' ', ' '],
+        instruction::w2::ST => ['S', 'T', ' ', ' '],
+        instruction::w2::LDA => ['L', 'D', 'A', ' '],
+        instruction::w2::ADDA => ['A', 'D', 'D', 'A'],
+        instruction::w2::SUBA => ['S', 'U', 'B', 'A'],
+        instruction::w2::ADDL => ['A', 'D', 'D', 'L'],
+        instruction::w2::SUBL => ['S', 'U', 'B', 'L'],
+        instruction::w2::AND => ['A', 'N', 'D', ' '],
+        instruction::w2::OR => ['O', 'R', ' ', ' '],
+        instruction::w2::XOR => ['X', 'O', 'R', ' '],
+        instruction::w2::CPA => ['C', 'P', 'A', ' '],
+        instruction::w2::CPL => ['C', 'P', 'L', ' '],
+        instruction::w2::SLA => ['S', 'L', 'A', ' '],
+        instruction::w2::SRA => ['S', 'R', 'A', ' '],
+        instruction::w2::SLL => ['S', 'L', 'L', ' '],
+        instruction::w2::SRL => ['S', 'R', 'L', ' '],
+        instruction::w2::JMI => ['J', 'M', 'I', ' '],
+        instruction::w2::JNZ => ['J', 'N', 'Z', ' '],
+        instruction::w2::JZE => ['J', 'Z', 'E', ' '],
+        instruction::w2::JUMP => ['J', 'U', 'M', 'P'],
+        instruction::w2::JPL => ['J', 'P', 'L', ' '],
+        instruction::w2::JOV => ['J', 'O', 'V', ' '],
+        instruction::w2::PUSH => ['P', 'U', 'S', 'H'],
+        instruction::w2::CALL => ['C', 'A', 'L', 'L'],
+        instruction::w2::SVC => ['S', 'V', 'C', ' '],
+        _ => ['I', 'D', 'K', '?'], // Unknown opcode
+    };
+    chars
+}
