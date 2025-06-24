@@ -1,6 +1,6 @@
-pub struct CPU {
+pub struct CPUState {
     /// マシンサイクルのカウンタ
-    pub cicle: u8,
+    pub cycle: u8,
     /// 汎用レジスタ
     pub GR: GeneralResister,
     /// プログラムレジスタ 
