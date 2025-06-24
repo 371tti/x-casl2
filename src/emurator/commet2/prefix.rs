@@ -1,3 +1,25 @@
+pub mod machine_cycle {
+    pub const FETCH: u8 = 0x00;
+    pub const DECODE: u8 = 0x01;
+    pub const ADDR_GEN: u8 = 0x02;
+    pub const EXECUTE: u8 = 0x03;
+    pub const END: u8 = 0xFF;
+}
+
+pub mod fetch_cycle {
+    pub const READ_PR2MAR: u8 = 0x00;
+    pub const READ_MEM2MDR: u8 = 0x01;
+    pub const MDR2IR1: u8 = 0x02;
+    pub const READ_PR2MAR_FOR2W: u8 = 0x03;
+    pub const READ_MEM2MDR_FOR2W: u8 = 0x04;
+    pub const MDR2IR2: u8 = 0x05;
+}
+
+pub mod decoder_cycle {
+    pub const DECODE: u8 = 0x00;
+    pub const SYNC_CONTROLLER: u8 = 0x01;
+}
+
 pub mod instruction {
     pub mod w1 {
         pub const NOP: u8 = 0x00;

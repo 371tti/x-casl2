@@ -1,6 +1,8 @@
 pub struct CPUState {
     /// マシンサイクルのカウンタ
-    pub cycle: u8,
+    pub machine_cycle: u8,
+    /// 各ステップのサイクルカウンタ
+    pub step_cycle: u8,
     /// 汎用レジスタ
     pub gr: GeneralRegister,
     /// プログラムレジスタ
@@ -19,6 +21,8 @@ pub struct CPUState {
     pub ir: [u16; 2],
     /// フラグレジスタ
     pub fr: [bool; 3],
+    /// デコーダーのデコード結果
+    pub decoder_state: Dec
 }
 
 /// 汎用レジスタの構造体
@@ -41,7 +45,8 @@ impl CPUState {
     /// 新しいCPUの状態を初期化する
     pub fn new() -> Self {
         CPUState {
-            cycle: 0,
+            machine_cycle: 0,
+            step_cycle: 0,
             gr: GeneralRegister {
                 gr0: 0,
                 gr1: 0,
