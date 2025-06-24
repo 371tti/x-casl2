@@ -5,6 +5,8 @@ pub struct CPUState {
     pub gr: GeneralRegister,
     /// プログラムレジスタ
     pub pr: u16,
+    /// 生成されたアドレスのレジスタ
+    pub gen_addr: u16,
     /// メモリアドレスレジスタ
     pub mar: u16,
     /// メモリリードレジスタ
@@ -33,3 +35,32 @@ pub struct GeneralRegister {
 
 /// メインメモリ
 pub struct Memory(pub [u16; 65536]);
+
+
+impl CPUState {
+    /// 新しいCPUの状態を初期化する
+    pub fn new() -> Self {
+        CPUState {
+            cycle: 0,
+            gr: GeneralRegister {
+                gr0: 0,
+                gr1: 0,
+                gr2: 0,
+                gr3: 0,
+                gr4: 0,
+                gr5: 0,
+                gr6: 0,
+                gr7: 0,
+            },
+            pr: 0,
+            gen_addr: 0,
+            mar: 0,
+            mrr: 0,
+            sp: 0xFFFF, // スタックポインタは通常65535で初期化
+            memory: Memory([0; 65536]),
+            ir: [0, 0],
+            fr: [false; 3], // フラグレジスタは全てfalseで初期化
+        }
+    }
+    
+}
