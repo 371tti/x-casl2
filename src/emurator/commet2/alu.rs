@@ -1,6 +1,8 @@
 
+/// ALU (Arithmetic Logic Unit) の実装
 pub struct ALU;
 
+/// 必要な算術論理演算を定義するトレイト
 pub trait ALUExecution {
     type Return;
     fn and(&mut self, a: u16, b: u16) -> Self::Return;
