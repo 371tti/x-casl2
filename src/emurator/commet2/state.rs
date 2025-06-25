@@ -1,3 +1,5 @@
+use crate::emurator::commet2::decoder::DecResult;
+
 pub struct CPUState {
     /// マシンサイクルのカウンタ
     pub machine_cycle: u8,
@@ -22,7 +24,14 @@ pub struct CPUState {
     /// フラグレジスタ
     pub fr: [bool; 3],
     /// デコーダーのデコード結果
-    pub decoder_state: Dec
+    pub decoder_state: DecResult,
+}
+
+impl CPUState {
+    pub fn next_cycle(&mut self) {
+        self.machine_cycle += 1;
+        self.step_cycle = 0; // 各ステップのサイクルはリセット
+    }
 }
 
 /// 汎用レジスタの構造体
@@ -35,6 +44,23 @@ pub struct GeneralRegister {
     pub gr5: u16,
     pub gr6: u16,
     pub gr7: u16,
+}
+
+impl GeneralRegister {
+    /// 新しい汎用レジスタを初期化する
+    pub fn get(&self, index: u8) -> u16 {
+        match index {
+            0 => self.gr0,
+            1 => self.gr1,
+            2 => self.gr2,
+            3 => self.gr3,
+            4 => self.gr4,
+            5 => self.gr5,
+            6 => self.gr6,
+            7 => self.gr7,
+            _ => panic!("Invalid general register index"),
+        }
+    }
 }
 
 /// メインメモリ
@@ -65,6 +91,13 @@ impl CPUState {
             memory: Memory([0; 65536]),
             ir: [0, 0],
             fr: [false; 3], // フラグレジスタは全てfalseで初期化
+            decoder_state: DecResult {
+                w2: false,
+                opcode: 0,
+                r1: 0,
+                r2: 0,
+                addr: 0,
+            }
         }
     }
     
