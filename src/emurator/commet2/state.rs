@@ -1,4 +1,4 @@
-use crate::emurator::commet2::decoder::DecResult;
+use crate::emurator::commet2::{decoder::DecResult, prefix::machine_cycle};
 
 pub struct CPUState {
     /// マシンサイクルのカウンタ
@@ -28,8 +28,17 @@ pub struct CPUState {
 }
 
 impl CPUState {
+    pub fn next_line(&mut self) {
+        // プログラムレジスタを次のアドレスに進める
+        self.pr = unsafe {
+            self.pr.unchecked_add(1)
+        };
+    }
     pub fn next_cycle(&mut self) {
-        self.machine_cycle += 1;
+        self.pr = unsafe {
+            self.pr.unchecked_add(1)
+        };
+        self.machine_cycle = machine_cycle::FETCH; // マシンサイクルはフェッチにリセット
         self.step_cycle = 0; // 各ステップのサイクルはリセット
     }
 }
@@ -58,6 +67,20 @@ impl GeneralRegister {
             5 => self.gr5,
             6 => self.gr6,
             7 => self.gr7,
+            _ => panic!("Invalid general register index"),
+        }
+    }
+
+    pub fn get_mut(&mut self, index: u8) -> &mut u16 {
+        match index {
+            0 => &mut self.gr0,
+            1 => &mut self.gr1,
+            2 => &mut self.gr2,
+            3 => &mut self.gr3,
+            4 => &mut self.gr4,
+            5 => &mut self.gr5,
+            6 => &mut self.gr6,
+            7 => &mut self.gr7,
             _ => panic!("Invalid general register index"),
         }
     }
