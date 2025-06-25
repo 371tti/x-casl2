@@ -34,11 +34,19 @@ impl CPUState {
             self.pr.unchecked_add(1)
         };
     }
+
     pub fn next_cycle(&mut self) {
         self.pr = unsafe {
             self.pr.unchecked_add(1)
         };
         self.machine_cycle = machine_cycle::FETCH; // マシンサイクルはフェッチにリセット
+        self.step_cycle = 0; // 各ステップのサイクルはリセット
+    }
+
+    pub fn next_step_cycle(&mut self) {
+        self.machine_cycle = unsafe {
+            self.machine_cycle.unchecked_add(1)
+        };
         self.step_cycle = 0; // 各ステップのサイクルはリセット
     }
 }

@@ -1,4 +1,4 @@
-use std::thread::LocalKey;
+use std::{fmt::Debug, thread::LocalKey};
 
 use crate::emurator::commet2::{alu::{ALUExecution, ALU}, decoder::{DecResult, Decoder, DecoderExecution}, prefix::{decoder_cycle, fetch_cycle, instruction, machine_cycle, opecode_to_4char}};
 
@@ -48,6 +48,30 @@ pub enum UpdateNotify {
     END,
 }
 
+impl Debug for UpdateNotify {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            UpdateNotify::PR(val) => write!(f, "SET PR(0x{:04X})", val),
+            UpdateNotify::SP(val) => write!(f, "SET SP(0x{:04X})", val),
+            UpdateNotify::MAR(val) => write!(f, "SET MAR(0x{:04X})", val),
+            UpdateNotify::MDR(val) => write!(f, "SET MDR(0x{:04X})", val),
+            UpdateNotify::IR0(val) => write!(f, "SET IR0(0x{:04X})", val),
+            UpdateNotify::IR1(val) => write!(f, "SET IR1(0x{:04X})", val),
+            UpdateNotify::DECODER(val) => write!(f, "SET DECODER([0x{:04X}, 0x{:04X}])", val[0], val[1]),
+            UpdateNotify::CONTOROLER(val) => write!(f, "SET CONTOROLER({:?})", val),
+            UpdateNotify::GENADDR(val) => write!(f, "GEN ADDR(0x{:04X})", val),
+            UpdateNotify::ACCSGR(r, val) => write!(f, "ACCESS SGR({}, 0x{:04X})", r, val),
+            UpdateNotify::EXEALU(r, val, flags) => write!(
+                f,
+                "EXE ALU(r{}, 0x{:04X}, [OF: {}, CF: {}, ZF: {}])",
+                r, val, flags[0], flags[1], flags[2]
+            ),
+            UpdateNotify::NONE => write!(f, "NONE"),
+            UpdateNotify::END => write!(f, "END"),
+        }
+    }
+}
+
 pub enum InitMode {
     NegativeFill,
     ZeroFill,
@@ -92,7 +116,7 @@ impl CPUExecution for CPU {
                 self.state.ir[0] = self.state.mrr;
                 if !Decoder::is_2w(&self.state.ir) {
                     // 1ワード命令の場合、次のマシンサイクルへ進む
-                    self.state.machine_cycle = machine_cycle::DECODE;
+                    self.state.next_step_cycle();
                 } else {
                     // 2ワード命令の場合、次のフェッチサイクルへ進む
                     self.state.next_line();
@@ -104,7 +128,7 @@ impl CPUExecution for CPU {
                 // メモリデータレジスタの内容を命令レジスタの2番目へ転送
                 self.state.ir[1] = self.state.mrr;
                 // 次のマシンサイクルへ進む
-                self.state.machine_cycle = machine_cycle::DECODE;
+                self.state.next_step_cycle();
                 UpdateNotify::IR1(self.state.ir[1])
             },
             _ => {
@@ -123,7 +147,7 @@ impl CPUExecution for CPU {
             },
             decoder_cycle::SYNC_CONTROLLER => {
                 let op_chars = opecode_to_4char((self.state.ir[0] >> 8) as u8);
-                self.state.machine_cycle = machine_cycle::ADDR_GEN;
+                self.state.next_step_cycle();
                 UpdateNotify::CONTOROLER(op_chars)
             },
             _ => {
@@ -140,10 +164,13 @@ impl CPUExecution for CPU {
                 self.state.gen_addr = self.state.gr.get(
                     self.state.decoder_state.r2
                 );
-                self.state.machine_cycle = machine_cycle::EXECUTE;
+                self.state.next_step_cycle();
                 UpdateNotify::GENADDR(self.state.gen_addr)
             },
-            instruction::w2::ADDA
+            instruction::w2::LD
+            | instruction::w2::ST
+            | instruction::w2::LDA
+            | instruction::w2::ADDA
             | instruction::w2::SUBA
             | instruction::w2::ADDL
             | instruction::w2::SUBL 
@@ -153,30 +180,37 @@ impl CPUExecution for CPU {
             | instruction::w2::CPA
             | instruction::w2::CPL
             | instruction::w2::SLA
+            | instruction::w2::SRA
             | instruction::w2::SRL
             | instruction::w2::SLL
-            | instruction::w2::SLA
             | instruction::w2::JMI
             | instruction::w2::JNZ
             | instruction::w2::JZE
             | instruction::w2::JUMP
             | instruction::w2::JPL
             | instruction::w2::JOV => {
-                let x = self.state.gr.get(
-                    self.state.decoder_state.r2
-                );
-                let addr = self.state.decoder_state.addr;
-                let gen_addr = unsafe {
-                    x.unchecked_add(addr)
-                }; 
-                self.state.gen_addr = gen_addr;
-                self.state.machine_cycle = machine_cycle::EXECUTE;
-                UpdateNotify::GENADDR(self.state.gen_addr)
+                if self.state.decoder_state.r2 == 0 {
+                    let gen_addr = self.state.decoder_state.addr;
+                    self.state.gen_addr = gen_addr;
+                    self.state.next_step_cycle();
+                    UpdateNotify::GENADDR(self.state.gen_addr)
+                } else {
+                    let x = self.state.gr.get(
+                        self.state.decoder_state.r2
+                    );
+                    let addr = self.state.decoder_state.addr;
+                    let gen_addr = unsafe {
+                        x.unchecked_add(addr)
+                    }; 
+                    self.state.gen_addr = gen_addr;
+                    self.state.next_step_cycle();
+                    UpdateNotify::GENADDR(self.state.gen_addr)
+                }
             }
             _ => {
                 println!("Opcode: {}", opcode);
                 println!("skip addr gen");
-                self.state.machine_cycle = machine_cycle::EXECUTE;
+                self.state.next_step_cycle();
                 UpdateNotify::NONE
             }
         }
@@ -739,10 +773,73 @@ impl CPUExecution for CPU {
             instruction::w2::JMI => {
                 // MAR から PR へ
                 let fr = self.state.fr;
-                if fr[1] == true && fr[2] == false {
-                    self.state.pr = self.state.mar;
+                if fr[1] == true{
+                    self.state.pr = gen_addr;
+                    self.state.machine_cycle = machine_cycle::FETCH;
                     UpdateNotify::PR(self.state.pr)
+                } else {
+                    self.state.next_cycle();
+                    UpdateNotify::NONE
                 }
+            },
+            instruction::w2::JNZ => {
+                // MAR から PR へ
+                let fr = self.state.fr;
+                if fr[2] == false {
+                    self.state.pr = gen_addr;
+                    self.state.machine_cycle = machine_cycle::FETCH;
+                    UpdateNotify::PR(self.state.pr)
+                } else {
+                    self.state.next_cycle();
+                    UpdateNotify::NONE
+                }
+            },
+            instruction::w2::JZE => {
+                // MAR から PR へ
+                let fr = self.state.fr;
+                if fr[2] == true {
+                    self.state.pr = gen_addr;
+                    self.state.machine_cycle = machine_cycle::FETCH;
+                    UpdateNotify::PR(self.state.pr)
+                } else {
+                    self.state.next_cycle();
+                    UpdateNotify::NONE
+                }
+            },
+            instruction::w2::JUMP => {
+                // MAR から PR へ
+                self.state.pr = gen_addr;
+                self.state.machine_cycle = machine_cycle::FETCH;
+                UpdateNotify::PR(self.state.pr)
+            },
+            instruction::w2::JPL => {
+                // MAR から PR へ
+                let fr = self.state.fr;
+                if fr[1] == false && fr[2] == false {
+                    self.state.pr = gen_addr;
+                    self.state.machine_cycle = machine_cycle::FETCH;
+                    UpdateNotify::PR(self.state.pr)
+                } else {
+                    self.state.next_cycle();
+                    UpdateNotify::NONE
+                }
+            },
+            instruction::w2::JOV => {
+                // MAR から PR へ
+                let fr = self.state.fr;
+                if fr[0] == true {
+                    self.state.pr = gen_addr;
+                    self.state.machine_cycle = machine_cycle::FETCH;
+                    UpdateNotify::PR(self.state.pr)
+                } else {
+                    self.state.next_cycle();
+                    UpdateNotify::NONE
+                }
+            },
+            _ => {
+                println!("Unknown opcode: {}", opcode);
+                self.state.next_cycle();
+                UpdateNotify::NONE
             }
         }
 
