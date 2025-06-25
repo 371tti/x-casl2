@@ -29,7 +29,7 @@ pub trait CPUExecution {
     /// コメットステップ実行
     fn commet2_step(&mut self) -> Self::UpdateNotify;
     /// キャッスルステップ実行
-    fn castle_step(&mut self) -> Self::UpdateNotify;
+    fn castle_step(&mut self);
 }
 
 pub enum UpdateNotify {
@@ -208,8 +208,7 @@ impl CPUExecution for CPU {
                 }
             }
             _ => {
-                println!("Opcode: {}", opcode);
-                println!("skip addr gen");
+                // アドレス生成は不要な命令
                 self.state.next_step_cycle();
                 UpdateNotify::NONE
             }
@@ -869,8 +868,13 @@ impl CPUExecution for CPU {
         }
     }
     
-    fn castle_step(&mut self) -> Self::UpdateNotify {
-        todo!()
+    fn castle_step(&mut self) {
+        loop {
+            self.commet2_step();
+            if self.state.machine_cycle == machine_cycle::FETCH {
+                break;
+            }
+        }
     }
 
     

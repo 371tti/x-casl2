@@ -1,4 +1,4 @@
-use crate::emurator::commet2::{decoder::DecResult, prefix::machine_cycle};
+use crate::emurator::commet2::{decoder::DecResult, prefix::{machine_cycle, opecode_to_4char}};
 
 pub struct CPUState {
     /// マシンサイクルのカウンタ
@@ -48,6 +48,35 @@ impl CPUState {
             self.machine_cycle.unchecked_add(1)
         };
         self.step_cycle = 0; // 各ステップのサイクルはリセット
+    }
+}
+
+impl CPUState {
+    pub fn display_state(&self) {
+        println!(
+            "Machine Cycle: {}\n\
+            Step Cycle: {}\n\
+            General Registers: GR0: {}, GR1: {}, GR2: {}, GR3: {}, GR4: {}, GR5: {}, GR6: {}, GR7: {}\n\
+            Program Register (PR): {}\n\
+            Generated Address (GenAddr): {}\n\
+            Memory Address Register (MAR): {}\n\
+            Memory Read Register (MRR): {}\n\
+            Stack Pointer (SP): {}\n\
+            Instruction Register (IR): [{}, {}]\n\
+            Controler Mode: {:?}\n\
+            Flags Register (FR): [OF: {}, SF: {}, ZF: {}]\n\n",
+            self.machine_cycle,
+            self.step_cycle,
+            self.gr.gr0, self.gr.gr1, self.gr.gr2, self.gr.gr3, self.gr.gr4, self.gr.gr5, self.gr.gr6, self.gr.gr7,
+            self.pr,
+            self.gen_addr,
+            self.mar,
+            self.mrr,
+            self.sp,
+            self.ir[0], self.ir[1],
+            opecode_to_4char(self.decoder_state.opcode),
+            self.fr[0], self.fr[1], self.fr[2]
+        );
     }
 }
 
