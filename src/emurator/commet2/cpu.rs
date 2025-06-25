@@ -1,3 +1,5 @@
+use std::thread::LocalKey;
+
 use crate::emurator::commet2::{alu::{ALUExecution, ALU}, decoder::{DecResult, Decoder, DecoderExecution}, prefix::{decoder_cycle, fetch_cycle, instruction, machine_cycle, opecode_to_4char}};
 
 use super::state::CPUState;
@@ -254,9 +256,494 @@ impl CPUExecution for CPU {
                 UpdateNotify::EXEALU(r1, exers.result, exers.flags)
             }
             instruction::w2::ADDA => {
-                
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.adda(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for ADDA: {}", step_cycle);
+                    }
+                } 
             }
-
+            instruction::w2::SUBA => {
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.suba(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for SUBA: {}", step_cycle);
+                    }
+                } 
+            },
+            instruction::w2::ADDL => {
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.addl(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for ADDL: {}", step_cycle);
+                    }
+                } 
+            },
+            instruction::w2::SUBL => {
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.subl(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for SUBL: {}", step_cycle);
+                    }
+                } 
+            },
+            instruction::w2::AND => {
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.and(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for AND: {}", step_cycle);
+                    }
+                } 
+            },
+            instruction::w2::OR => {
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.or(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for OR: {}", step_cycle);
+                    }
+                } 
+            },
+            instruction::w2::XOR => {
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.xor(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for XOR: {}", step_cycle);
+                    }
+                } 
+            },
+            instruction::w2::CPA => {
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.cpa(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for CPA: {}", step_cycle);
+                    }
+                } 
+            },
+            instruction::w2::CPL => {
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.cpl(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for CPL: {}", step_cycle);
+                    }
+                } 
+            },
+            instruction::w2::SLA => {
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.sla(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for SLA: {}", step_cycle);
+                    }
+                }
+            },
+            instruction::w2::SRA => {
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.sra(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for SRA: {}", step_cycle);
+                    }
+                }
+            },
+            instruction::w2::SLL => {
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.sll(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for SLL: {}", step_cycle);
+                    }
+                }
+            },
+            instruction::w2::SRL => {
+                match step_cycle {
+                    0 => {
+                        // MARにアドレスをセット
+                        self.state.mar = gen_addr;
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MAR(self.state.mar)
+                    },
+                    1 => {
+                        // MRRにデータをセット
+                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        self.state.step_cycle += 1;
+                        UpdateNotify::MDR(self.state.mrr)
+                    },
+                    2 => {
+                        // ALUを通してフラグセット&汎用レジスタにデータをセット
+                        let exers = self.alu.srl(
+                            self.state.gr.get(r1),
+                            self.state.mrr
+                        );
+                        self.state.fr = exers.flags;
+                        *self.state.gr.get_mut(r1) = exers.result;
+                        self.state.next_cycle();
+                        UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+                    }
+                    _ => {
+                        panic!("Unknown step cycle for SRL: {}", step_cycle);
+                    }
+                }
+            },
+            instruction::w1::ADDA => {
+                // ALUを通してフラグセット&汎用レジスタにデータをセット
+                let exers = self.alu.adda(
+                    self.state.gr.get(r1),
+                    self.state.gr.get(r2)
+                );
+                self.state.fr = exers.flags;
+                *self.state.gr.get_mut(r1) = exers.result;
+                self.state.next_cycle();
+                UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+            },
+            instruction::w1::SUBA => {
+                let exers = self.alu.suba(
+                    self.state.gr.get(r1),
+                    self.state.gr.get(r2)
+                );
+                self.state.fr = exers.flags;
+                *self.state.gr.get_mut(r1) = exers.result;
+                self.state.next_cycle();
+                UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+            },
+            instruction::w1::ADDL => {
+                let exers = self.alu.addl(
+                                        self.state.gr.get(r1),
+                    self.state.gr.get(r2)
+                );
+                self.state.fr = exers.flags;
+                *self.state.gr.get_mut(r1) = exers.result;
+                self.state.next_cycle();
+                UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+            },
+            instruction::w1::SUBL => {
+                let exers = self.alu.subl(
+                    self.state.gr.get(r1),
+                    self.state.gr.get(r2)
+                );
+                self.state.fr = exers.flags;
+                *self.state.gr.get_mut(r1) = exers.result;
+                self.state.next_cycle();
+                UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+            },
+            instruction::w1::AND => {
+                let exers = self.alu.and(
+                    self.state.gr.get(r1),
+                    self.state.gr.get(r2)
+                );
+                self.state.fr = exers.flags;
+                *self.state.gr.get_mut(r1) = exers.result;
+                self.state.next_cycle();
+                UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+            },
+            instruction::w1::OR => {
+                let exers = self.alu.or(
+                    self.state.gr.get(r1),
+                    self.state.gr.get(r2)
+                );
+                self.state.fr = exers.flags;
+                *self.state.gr.get_mut(r1) = exers.result;
+                self.state.next_cycle();
+                UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+            },
+            instruction::w1::XOR => {
+                let exers = self.alu.xor(
+                    self.state.gr.get(r1),
+                    self.state.gr.get(r2)
+                );
+                self.state.fr = exers.flags;
+                *self.state.gr.get_mut(r1) = exers.result;
+                self.state.next_cycle();
+                UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+            },
+            instruction::w1::CPA => {
+                let exers = self.alu.cpa(
+                    self.state.gr.get(r1),
+                    self.state.gr.get(r2)
+                );
+                self.state.fr = exers.flags;
+                *self.state.gr.get_mut(r1) = exers.result;
+                self.state.next_cycle();
+                UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+            },
+            instruction::w1::CPL => {
+                let exers = self.alu.cpl(
+                    self.state.gr.get(r1),
+                    self.state.gr.get(r2)
+                );
+                self.state.fr = exers.flags;
+                *self.state.gr.get_mut(r1) = exers.result;
+                self.state.next_cycle();
+                UpdateNotify::EXEALU(r1, exers.result, exers.flags)
+            },
+            instruction::w2::JMI => {
+                // MAR から PR へ
+                let fr = self.state.fr;
+                if fr[1] == true && fr[2] == false {
+                    self.state.pr = self.state.mar;
+                    UpdateNotify::PR(self.state.pr)
+                }
+            }
         }
 
     }
