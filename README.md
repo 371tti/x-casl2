@@ -1,8 +1,9 @@
 <div align="center">
 <h1 style="font-size: 50px">X-CASL2</h1>
+<p>基本情報技術者試験で登場するCPUのエミュレーター、アセンブラー、Editor</p>
 </div>
 
-基本情報技術者試験で登場するCPUのエミュレーター、アセンブラー、Editor
+
 
 # ToDo
 ## first
