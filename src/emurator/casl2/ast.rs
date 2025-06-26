@@ -35,12 +35,13 @@ impl ASTNode {
         let mut nodes = Vec::new();
 
         for line in lines {
-
+            nodes.push(Self::analyze(line)?);
         }
+        Ok(nodes)
     }
 
     pub fn analyze(str: &str) -> Result<Self, Casl2AssemblerError> {
         let mut iter = str.split_whitespace();
-
+        
     }
 }
