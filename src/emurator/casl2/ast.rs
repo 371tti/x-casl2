@@ -41,7 +41,26 @@ impl ASTNode {
     }
 
     pub fn analyze(str: &str) -> Result<Self, Casl2AssemblerError> {
-        let mut iter = str.split_whitespace();
+        let mut iter = str.split("/t").into_iter();
         
+        let uc_label = iter.next().map(|s| s.trim().to_string());
+        let uc_opcode = iter.next().map(|s| s.trim().to_string());
+        let uc_operands = iter.next().map(|s| s.trim().to_string()).unwrap_or_default();
+        
+        let cd_label: Option<String>;
+        let cd_opcode: Option<String>;
+        let cd_operands: Vec<String>;
+
+        // ラベルがある場合 ラベルを解析
+        if let Some(label) = uc_label {
+            if label.len() > 4 {
+                return Err(Casl2AssemblerError::ParseError(format!("Label '{}' is too long", label)));
+            }
+            if label.len() == 0 {
+                cd_label = None;
+            } else {
+                cd_label = Some(label);
+            }
+        } // ラベルがない場合skip
     }
 }
