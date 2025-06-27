@@ -1,3 +1,6 @@
+use std::sync::OnceLock;
+use std::sync::RwLock;
+static LAST_DISPLAY: OnceLock<RwLock<std::time::Instant>> = OnceLock::new();
 use crate::emurator::commet2::cpu::CPUExecution;
 use std::io::{self, Write};
 use std::{thread, time};
@@ -18,12 +21,10 @@ fn main() {
     commet2.state.sp = 0x0000; // スタックポイン
 
     loop {
-        let res = commet2.castle_step();
+        let res = commet2.commet2_step();
         // 画面をクリアしてから状態を表示（1ms周期で表示のみ）
-        use std::sync::OnceLock;
-        use std::sync::RwLock;
-        static LAST_DISPLAY: OnceLock<RwLock<std::time::Instant>> = OnceLock::new();
         let now = std::time::Instant::now();
+        thread::sleep(std::time::Duration::from_millis(100)); // 1ms待機
         let last_display = LAST_DISPLAY.get_or_init(|| RwLock::new(std::time::Instant::now()));
         {
             let last_display_read = last_display.read().unwrap();
@@ -31,7 +32,7 @@ fn main() {
                 drop(last_display_read); // Release read lock before acquiring write lock
                 print!("\x1B[2J\x1B[1;1H");
                 commet2.state.display_state();
-                io::stdout().flush().unwrap();
+                println!("Last Result: {:?}", res);
                 let mut last_display_write = last_display.write().unwrap();
                 *last_display_write = now;
             }

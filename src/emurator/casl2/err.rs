@@ -4,6 +4,7 @@ use std::fmt;
 pub enum Casl2AssemblerError {
     IoError(std::io::Error),
     ParseError(String),
+    AnalyzeError(String),
     InvalidInstruction(String),
     OutOfMemory,
     UnknownLabel(String),
@@ -15,6 +16,7 @@ impl fmt::Display for Casl2AssemblerError {
         match self {
             Casl2AssemblerError::IoError(e) => write!(f, "IO error: {}", e),
             Casl2AssemblerError::ParseError(msg) => write!(f, "Parse error: {}", msg),
+            Casl2AssemblerError::AnalyzeError(msg) => write!(f, "Analyze error: {}", msg),
             Casl2AssemblerError::InvalidInstruction(inst) => write!(f, "Invalid instruction: {}", inst),
             Casl2AssemblerError::OutOfMemory => write!(f, "Out of memory"),
             Casl2AssemblerError::UnknownLabel(label) => write!(f, "Unknown label: {}", label),
