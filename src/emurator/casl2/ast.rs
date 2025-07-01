@@ -71,8 +71,33 @@ impl ASTNode {
                         comment,
                     })
                 },
-                _ => {
-                    // マシン命令
+                assembler_instructions::NOP
+                | assembler_instructions::LD
+                | assembler_instructions::ADDA
+                | assembler_instructions::SUBA
+                | assembler_instructions::ADDL
+                | assembler_instructions::SUBL
+                | assembler_instructions::AND
+                | assembler_instructions::OR
+                | assembler_instructions::XOR
+                | assembler_instructions::CPA
+                | assembler_instructions::CPL
+                | assembler_instructions::POP
+                | assembler_instructions::ST
+                | assembler_instructions::LAD
+                | assembler_instructions::SLA
+                | assembler_instructions::SRA
+                | assembler_instructions::SLL
+                | assembler_instructions::SRL
+                | assembler_instructions::JMI
+                | assembler_instructions::JNZ
+                | assembler_instructions::JZE
+                | assembler_instructions::JUMP
+                | assembler_instructions::JPL
+                | assembler_instructions::JOV
+                | assembler_instructions::PUSH
+                | assembler_instructions::CALL
+                | assembler_instructions::SVC => {
                     let operands: Vec<String> = operand.split(',').map(|s| s.trim().to_string()).collect();
                     match operands.len() {
                         0 => {

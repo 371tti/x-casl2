@@ -16,7 +16,7 @@ pub mod assembler_instructions {
     pub const CPL: &str = "CPL";
     pub const POP: &str = "POP";
     pub const ST: &str = "ST";
-    pub const LDA: &str = "LDA";
+    pub const LAD: &str = "LAD";
     pub const SLA: &str = "SLA";
     pub const SRA: &str = "SRA";
     pub const SLL: &str = "SLL";
@@ -53,7 +53,7 @@ pub enum Operation {
     POP1W(u8),
     LD2W(u8, u8, u16),
     ST2W(u8, u8, u16),
-    LDA2W(u8, u8, u16),
+    LAD2W(u8, u8, u16),
     ADDA2W(u8, u8, u16),
     SUBA2W(u8, u8, u16),
     ADDL2W(u8, u8, u16),

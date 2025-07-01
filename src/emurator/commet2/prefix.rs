@@ -44,7 +44,7 @@ pub mod instruction {
     pub mod w2 {
         pub const LD: u8 = 0x10;
         pub const ST: u8 = 0x11;
-        pub const LDA: u8 = 0x12;
+        pub const LAD: u8 = 0x12;
 
         pub const ADDA: u8 = 0x20;
         pub const SUBA: u8 = 0x21;
@@ -95,7 +95,7 @@ pub fn opecode_to_4char(opcode: u8) -> [char; 4] {
         instruction::w1::RET => ['R', 'E', 'T', ' '],
         instruction::w2::LD => ['L', 'D', ' ', ' '],
         instruction::w2::ST => ['S', 'T', ' ', ' '],
-        instruction::w2::LDA => ['L', 'D', 'A', ' '],
+        instruction::w2::LAD => ['L', 'D', 'A', ' '],
         instruction::w2::ADDA => ['A', 'D', 'D', 'A'],
         instruction::w2::SUBA => ['S', 'U', 'B', 'A'],
         instruction::w2::ADDL => ['A', 'D', 'D', 'L'],
