@@ -85,7 +85,7 @@ impl DecoderExecution for Decoder {
             }
             instruction::w2::LD
             | instruction::w2::ST
-            | instruction::w2::LDA
+            | instruction::w2::LAD
             | instruction::w2::ADDA
             | instruction::w2::SUBA
             | instruction::w2::ADDL

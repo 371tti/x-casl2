@@ -14,7 +14,7 @@ pub struct CPUState {
     /// メモリアドレスレジスタ
     pub mar: u16,
     /// メモリリードレジスタ
-    pub mrr: u16,
+    pub mdr: u16,
     /// スタックポインタ
     pub sp: u16,
     /// メモリ
@@ -60,7 +60,7 @@ impl CPUState {
             Program Register (PR): {}\n\
             Generated Address (GenAddr): {}\n\
             Memory Address Register (MAR): {}\n\
-            Memory Read Register (MRR): {}\n\
+            Memory Read Register (MDR): {}\n\
             Stack Pointer (SP): {}\n\
             Instruction Register (IR): [{}, {}]\n\
             Controler Mode: {:?}\n\
@@ -71,7 +71,7 @@ impl CPUState {
             self.pr,
             self.gen_addr,
             self.mar,
-            self.mrr,
+            self.mdr,
             self.sp,
             self.ir[0], self.ir[1],
             opecode_to_4char(self.decoder_state.opcode),
@@ -146,7 +146,7 @@ impl CPUState {
             pr: 0,
             gen_addr: 0,
             mar: 0,
-            mrr: 0,
+            mdr: 0,
             sp: 0xFFFF, // スタックポインタは通常65535で初期化
             memory: Memory([0; 65536]),
             ir: [0, 0],

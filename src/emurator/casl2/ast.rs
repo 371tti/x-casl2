@@ -83,7 +83,7 @@ impl ASTNode {
                 | assembler_instructions::CPL
                 | assembler_instructions::POP
                 | assembler_instructions::ST
-                | assembler_instructions::LDA
+                | assembler_instructions::LAD
                 | assembler_instructions::SLA
                 | assembler_instructions::SRA
                 | assembler_instructions::SLL

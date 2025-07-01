@@ -29,7 +29,7 @@ pub trait CPUExecution {
     /// コメットステップ実行
     fn commet2_step(&mut self) -> Self::UpdateNotify;
     /// キャッスルステップ実行
-    fn castle_step(&mut self);
+    fn casl_step(&mut self);
 }
 
 pub enum UpdateNotify {
@@ -107,13 +107,13 @@ impl CPUExecution for CPU {
             fetch_cycle::READ_MEM2MDR
             | fetch_cycle::READ_MEM2MDR_FOR2W => {
                 // メモリからメモリデータレジスタへデータを転送
-                self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                self.state.mdr = self.state.memory.0[self.state.mar as usize];
                 self.state.step_cycle += 1;
-                UpdateNotify::MDR(self.state.mrr)
+                UpdateNotify::MDR(self.state.mdr)
             },
             fetch_cycle::MDR2IR1 => {
                 // メモリデータレジスタの内容を命令レジスタの1番目へ転送
-                self.state.ir[0] = self.state.mrr;
+                self.state.ir[0] = self.state.mdr;
                 if !Decoder::is_2w(&self.state.ir) {
                     // 1ワード命令の場合、次のマシンサイクルへ進む
                     self.state.next_step_cycle();
@@ -126,7 +126,7 @@ impl CPUExecution for CPU {
             },
             fetch_cycle::MDR2IR2 => {
                 // メモリデータレジスタの内容を命令レジスタの2番目へ転送
-                self.state.ir[1] = self.state.mrr;
+                self.state.ir[1] = self.state.mdr;
                 // 次のマシンサイクルへ進む
                 self.state.next_step_cycle();
                 UpdateNotify::IR1(self.state.ir[1])
@@ -169,7 +169,7 @@ impl CPUExecution for CPU {
             },
             instruction::w2::LD
             | instruction::w2::ST
-            | instruction::w2::LDA
+            | instruction::w2::LAD
             | instruction::w2::ADDA
             | instruction::w2::SUBA
             | instruction::w2::ADDL
@@ -237,14 +237,14 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     }
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
-                        let exers = self.alu.or(self.state.mrr, 0);
+                        let exers = self.alu.or(self.state.mdr, 0);
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
                         self.state.next_cycle();
@@ -264,14 +264,14 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.gr.get(r1);
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.gr.get(r1);
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     }
                     2 => {
                         // メモリにデータを書き込む
-                        self.state.memory.0[self.state.mar as usize] = self.state.mrr;
+                        self.state.memory.0[self.state.mar as usize] = self.state.mdr;
                         self.state.next_cycle();
                         UpdateNotify::NONE
                     }
@@ -280,7 +280,7 @@ impl CPUExecution for CPU {
                     }
                 }
             },
-            instruction::w2::LDA => {
+            instruction::w2::LAD => {
                 // ALUを通してフラグセット&汎用レジスタにデータをセット
                 let exers = self.alu.or(self.state.gen_addr, 0);
                 self.state.fr = exers.flags;
@@ -297,16 +297,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.adda(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -327,16 +327,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.suba(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -357,16 +357,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.addl(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -387,16 +387,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.subl(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -417,16 +417,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.and(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -447,16 +447,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.or(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -477,16 +477,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.xor(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -507,16 +507,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.cpa(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -537,16 +537,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.cpl(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -567,16 +567,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.sla(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -597,16 +597,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.sra(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -627,16 +627,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.sll(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -657,16 +657,16 @@ impl CPUExecution for CPU {
                         UpdateNotify::MAR(self.state.mar)
                     },
                     1 => {
-                        // MRRにデータをセット
-                        self.state.mrr = self.state.memory.0[self.state.mar as usize];
+                        // MDRにデータをセット
+                        self.state.mdr = self.state.memory.0[self.state.mar as usize];
                         self.state.step_cycle += 1;
-                        UpdateNotify::MDR(self.state.mrr)
+                        UpdateNotify::MDR(self.state.mdr)
                     },
                     2 => {
                         // ALUを通してフラグセット&汎用レジスタにデータをセット
                         let exers = self.alu.srl(
                             self.state.gr.get(r1),
-                            self.state.mrr
+                            self.state.mdr
                         );
                         self.state.fr = exers.flags;
                         *self.state.gr.get_mut(r1) = exers.result;
@@ -868,7 +868,7 @@ impl CPUExecution for CPU {
         }
     }
     
-    fn castle_step(&mut self) {
+    fn casl_step(&mut self) {
         loop {
             self.commet2_step();
             if self.state.machine_cycle == machine_cycle::FETCH {
