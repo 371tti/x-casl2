@@ -1,4 +1,4 @@
-use crate::emurator::casl2::{err::Casl2AssemblerError, prefix::assembler_instructions};
+use crate::emurator::casl2::{err::Casl2AssemblerError, prefix::{assembler_instructions, GR_LIST}};
 
 pub enum ASTNode {
     Machine1wInstruction {
@@ -59,6 +59,7 @@ impl ASTNode {
 
             match opcode.as_str() {
                 assembler_instructions::DC => {
+                    // アセンブラ命令
                     let operands: Vec<String> = operand.split(',').map(|s| s.trim().to_string()).collect();
                     if label.is_none() && operands.is_empty() {
                         return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid DC instruction, line: {}\n\t{}", line_number, str)));
@@ -70,39 +71,68 @@ impl ASTNode {
                         comment,
                     })
                 },
-                assembler_instructions::NOP
-                | assembler_instructions::LD
-                | assembler_instructions::ADDA
-                | assembler_instructions::SUBA
-                | assembler_instructions::ADDL
-                | assembler_instructions::SUBL
-                | assembler_instructions::AND
-                | assembler_instructions::OR
-                | assembler_instructions::XOR
-                | assembler_instructions::CPA
-                | assembler_instructions::CPL
-                | assembler_instructions::POP
-                | assembler_instructions::ST
-                | assembler_instructions::LDA
-                | assembler_instructions::SLA
-                | assembler_instructions::SRA
-                | assembler_instructions::SLL
-                | assembler_instructions::SRL
-                | assembler_instructions::JMI
-                | assembler_instructions::JNZ
-                | assembler_instructions::JZE
-                | assembler_instructions::JUMP
-                | assembler_instructions::JPL
-                | assembler_instructions::JOV
-                | assembler_instructions::PUSH
-                | assembler_instructions::CALL
-                | assembler_instructions::SVC => {
-                    let operands: Vec<String> = operand.split(',').map(|s| s.trim().to_string()).collect();
-                    if 
-                },
                 _ => {
-                    return Err(Casl2AssemblerError::AnalyzeError(format!("Unknown opcode: {}, line: {}\n\t{}", opcode, line_number, str)));
-                }
+                    // マシン命令
+                    let operands: Vec<String> = operand.split(',').map(|s| s.trim().to_string()).collect();
+                    match operands.len() {
+                        0 => {
+                            // ラベルとオペコードのみ
+                            Ok(Self::Machine1wInstruction {
+                                label: label,
+                                opcode,
+                                r1: 0,
+                                r2: 0,
+                                comment,
+                            })
+                        }
+                        1 => {
+                            // オペランドがレジスタ番号か確認
+                            if let Some(r) = GR_LIST.iter().position(|&x| x == operands[0]) {
+                                let r = r as u8;
+                                Ok(Self::Machine1wInstruction {
+                                    label: label,
+                                    opcode,
+                                    r1: r,
+                                    r2: 0,
+                                    comment,
+                                })
+                            } else {
+                                return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid operand for {} instruction, line: {}\n\t{}", opcode, line_number, str)));
+                            }
+                        }
+                        2 => {
+                            if let Some(r2) = GR_LIST.iter().position(|&x| x == operands[1]) {
+                                // [1] がレジスタ番号か確認
+                                // GRn GRm になってるはず
+                                let r2 = r2 as u8;
+                                if let Some(r1) = GR_LIST.iter().position(|&x| x == operands[0]) {
+                                    // [0] もレジスタ番号か確認
+                                    let r1 = r1 as u8;
+                                    Ok(Self::Machine1wInstruction {
+                                        label: label,
+                                        opcode,
+                                        r1,
+                                        r2,
+                                        comment,
+                                    })
+                                } else {
+                                    // GRn addr になってるはず
+                                    
+                                    return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid first operand for {} instruction, line: {}\n\t{}", opcode, line_number, str)));
+                                }
+                            } else {
+                                // GRn addr になってるはず
+                                return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid first operand for {} instruction, line: {}\n\t{}", opcode, line_number, str)));
+                            } 
+                        }
+                        3 => {
+                            todo!()
+                        }
+                        _ => {
+                            return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid number of operands for {} instruction, line: {}\n\t{}", opcode, line_number, str)));
+                        }
+                    }
+                },
             }
 
         } else {

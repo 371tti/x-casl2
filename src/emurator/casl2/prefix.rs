@@ -32,7 +32,11 @@ pub mod assembler_instructions {
     pub const SVC: &str = "SVC";
 }
 
-pub enum OpCode {
+pub const GR_LIST: [&str; 8] = [
+    "GR0", "GR1", "GR2", "GR3", "GR4", "GR5", "GR6", "GR7"
+];
+
+pub enum Operation {
     DC(u16, Vec<u16>),
     NOP,
     RET,
