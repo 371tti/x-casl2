@@ -122,7 +122,15 @@ impl ASTNode {
                                     comment,
                                 })
                             } else {
-                                return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid operand for {} instruction, line: {}\n\t{}", opcode, line_number, str)));
+                                // 出ない場合labelのはず JUMP addr みたいな
+                                Ok(Self::Machine2wInstruction {
+                                    label: label,
+                                    opcode,
+                                    r: 0,
+                                    x: 0,
+                                    addr: operands[0].clone(),
+                                    comment,
+                                })
                             }
                         }
                         2 => {
@@ -142,22 +150,30 @@ impl ASTNode {
                                     })
                                 } else {
                                     // GRn addr になってるはず
-                                    
-                                    return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid first operand for {} instruction, line: {}\n\t{}", opcode, line_number, str)));
+                                    Ok(Self::Machine2wInstruction {
+                                        label: label,
+                                        opcode,
+                                        r: 0,
+                                        x: r2,
+                                        addr: operands[0].clone(),
+                                        comment,
+                                    })
                                 }
                             } else {
-                                // GRn addr になってるはず
                                 return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid first operand for {} instruction, line: {}\n\t{}", opcode, line_number, str)));
                             } 
                         }
                         3 => {
-                            todo!()
+                            if let Some()
                         }
                         _ => {
                             return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid number of operands for {} instruction, line: {}\n\t{}", opcode, line_number, str)));
                         }
                     }
                 },
+                _ => {
+                    todo!()
+                }
             }
 
         } else {
