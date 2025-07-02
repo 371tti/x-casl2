@@ -164,7 +164,26 @@ impl ASTNode {
                             } 
                         }
                         3 => {
-                            if let Some()
+                            if let Some(r1) = GR_LIST.iter().position(|&x| x == operands[0]) {
+                                // [0] がレジスタ番号か確認
+                                let r1 = r1 as u8;
+                                if let Some(r2) = GR_LIST.iter().position(|&x| x == operands[2]) {
+                                    // [1] もレジスタ番号か確認
+                                    let r2 = r2 as u8;
+                                    Ok(Self::Machine2wInstruction {
+                                        label: label,
+                                        opcode,
+                                        r: r1,
+                                        x: r2,
+                                        addr: operands[1].clone(),
+                                        comment,
+                                    })
+                                } else {
+                                    return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid second operand for {} instruction, line: {}\n\t{}", opcode, line_number, str)));
+                                }
+                            } else {
+                                return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid first operand for {} instruction, line: {}\n\t{}", opcode, line_number, str)));
+                            }
                         }
                         _ => {
                             return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid number of operands for {} instruction, line: {}\n\t{}", opcode, line_number, str)));
