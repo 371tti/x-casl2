@@ -1,5 +1,6 @@
 use crate::emurator::casl2::{err::Casl2AssemblerError, prefix::{assembler_instructions, GR_LIST}};
 
+#[derive(Debug, Clone)]
 pub enum ASTNode {
     Machine1wInstruction {
         label: Option<String>,
@@ -47,13 +48,13 @@ impl ASTNode {
         }
 
         let re = regex::Regex::new(
-            r"^(?:(?P<label>\w{1,4})\t)?(?P<opcode>\w+)\t(?P<operand>[^\t;]*)(?:\s*;\s*(?P<comment>.*))?$"
+            r"^\s*(?:(?P<label>\w{1,4})\t)?(?P<opcode>\w+)(?:\t(?P<operand>[^\t;]*))?(?:\s*;\s*(?P<comment>.*))?$"
         ).unwrap();
 
         if let Some(cap) = re.captures(str) {
             let label = cap.name("label").map(|m| m.as_str().to_string());
             let opcode = cap.name("opcode").unwrap().as_str().to_string();
-            let operand = cap.name("operand").unwrap().as_str().to_string();
+            let operand = cap.name("operand").map(|m| m.as_str().to_string()).unwrap_or_default();
             let comment = cap.name("comment").map(|m| m.as_str().to_string());
             println!("{:?} {:?} {:?} {:?}", label, opcode, operand, comment);
 
@@ -70,6 +71,24 @@ impl ASTNode {
                         operands,
                         comment,
                     })
+                },
+                assembler_instructions::START => {
+                    // START命令
+                    let operands: Vec<String> = operand.split(',').map(|s| s.trim().to_string()).collect();
+                    if operands.len() != 1 {
+                        return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid START instruction, line: {}\n\t{}", line_number, str)));
+                    }
+                    Ok(Self::START {
+                        label: label.unwrap_or_default(),
+                        addr: operands[0].clone(),
+                    })
+                },
+                assembler_instructions::END => {
+                    // END命令
+                    if label.is_some() || !operand.is_empty() {
+                        return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid END instruction, line: {}\n\t{}", line_number, str)));
+                    }
+                    Ok(Self::END)
                 },
                 assembler_instructions::NOP
                 | assembler_instructions::LD
@@ -134,13 +153,13 @@ impl ASTNode {
                             }
                         }
                         2 => {
-                            if let Some(r2) = GR_LIST.iter().position(|&x| x == operands[1]) {
-                                // [1] がレジスタ番号か確認
+                            if let Some(r1) = GR_LIST.iter().position(|&x| x == operands[0]) {
+                                // [0] がレジスタ番号か確認
                                 // GRn GRm になってるはず
-                                let r2 = r2 as u8;
-                                if let Some(r1) = GR_LIST.iter().position(|&x| x == operands[0]) {
-                                    // [0] もレジスタ番号か確認
-                                    let r1 = r1 as u8;
+                                let r1 = r1 as u8;
+                                if let Some(r2) = GR_LIST.iter().position(|&x| x == operands[1]) {
+                                    // [1] もレジスタ番号か確認
+                                    let r2 = r2 as u8;
                                     Ok(Self::Machine1wInstruction {
                                         label: label,
                                         opcode,
@@ -154,7 +173,7 @@ impl ASTNode {
                                         label: label,
                                         opcode,
                                         r: 0,
-                                        x: r2,
+                                        x: r1,
                                         addr: operands[0].clone(),
                                         comment,
                                     })
