@@ -32,6 +32,7 @@ pub enum ASTNode {
 }
 
 impl ASTNode {
+    /// casl2を解析してASTノードのベクタを生成する
     pub fn de(str: &str) -> Result<Vec<Self>, Casl2AssemblerError> {
         let lines = str.lines();
         let mut nodes = Vec::new();
@@ -42,6 +43,11 @@ impl ASTNode {
         Ok(nodes)
     }
 
+    /// 1行の文字列を解析してASTノードを生成する
+    /// regexをつかった簡単な解析を行う
+    /// 
+    /// 存在する命令しか処理しないことを保証しますが論理エラーなどは解析できない
+    /// あとエラーメッセージも不十分なので todo エラーメッセージをわかりやすくする
     pub fn analyze(line_number: usize, str: &str) -> Result<Self, Casl2AssemblerError> {
         if str.trim().is_empty() {
             return Ok(Self::EMPTY);

@@ -1,7 +1,7 @@
 
 #[cfg(test)]
 mod tests {
-    use x_casl2::emurator::casl2::ast::ASTNode;
+    use x_casl2::emurator::casl2::parser::ASTNode;
 
     #[test]
     fn test_ast_node_de() {

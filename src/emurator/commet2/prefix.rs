@@ -122,3 +122,55 @@ pub fn opecode_to_4char(opcode: u8) -> [char; 4] {
     };
     chars
 }
+
+pub fn opecode_to_binary(opcode: &str, is_2w: bool) -> u8 {
+    if is_2w {
+        match opcode {
+            "LD" => instruction::w2::LD,
+            "ST" => instruction::w2::ST,
+            "LAD" => instruction::w2::LAD,
+            "ADDA" => instruction::w2::ADDA,
+            "SUBA" => instruction::w2::SUBA,
+            "ADDL" => instruction::w2::ADDL,
+            "SUBL" => instruction::w2::SUBL,
+            "AND" => instruction::w2::AND,
+            "OR" => instruction::w2::OR,
+            "XOR" => instruction::w2::XOR,
+            "CPA" => instruction::w2::CPA,
+            "CPL" => instruction::w2::CPL,
+            "SLA" => instruction::w2::SLA,
+            "SRA" => instruction::w2::SRA,
+            "SLL" => instruction::w2::SLL,
+            "SRL" => instruction::w2::SRL,
+            "JMI" => instruction::w2::JMI,
+            "JNZ" => instruction::w2::JNZ,
+            "JZE" => instruction::w2::JZE,
+            "JUMP" => instruction::w2::JUMP,
+            "JPL" => instruction::w2::JPL,
+            "JOV" => instruction::w2::JOV,
+            "PUSH" => instruction::w2::PUSH,
+            "CALL" => instruction::w2::CALL,
+            "SVC" => instruction::w2::SVC,
+            _ => 0xFF, // Unknown opcode
+            
+        }
+    } else {
+        match opcode {
+            "NOP" => instruction::w1::NOP,
+            "LD" => instruction::w1::LD,
+            "ADDA" => instruction::w1::ADDA,
+            "SUBA" => instruction::w1::SUBA,
+            "ADDL" => instruction::w1::ADDL,
+            "SUBL" => instruction::w1::SUBL,
+            "AND" => instruction::w1::AND,
+            "OR" => instruction::w1::OR,
+            "XOR" => instruction::w1::XOR,
+            "CPA" => instruction::w1::CPA,
+            "CPL" => instruction::w1::CPL,
+            "POP" => instruction::w1::POP,
+            "RET" => instruction::w1::RET,
+            _ => 0xFF, // Unknown opcode
+            
+        }
+    }
+}
