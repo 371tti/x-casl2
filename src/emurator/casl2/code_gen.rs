@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
-use crate::emurator::{casl2::parser::ASTNode, commet2::prefix::opecode_to_binary};
+use crate::emurator::{casl2::{parser::ASTNode, prefix::assembler_instructions}, commet2::prefix::opecode_to_binary};
 
 
 pub struct MemLine {
@@ -20,28 +20,33 @@ pub struct CodeGenerator {
     pub mem_lines: Vec<MemLine>,
 }
 
-impl ASTNode {
-    pub fn gen_binary(&self, label_map: &HashMap<String, u16>) -> Vec<u16> {
-        let mut binary: Vec<u16> = Vec::new();
-        match self {
-            ASTNode::Machine1wInstruction { label, opcode, r1, r2, comment } => {
-                match opcode.as_str() {
-                    "DC" => {
-                        
+impl CodeGenerator {
+    pub fn confirm_addr(ast_nodes: Vec<ASTNode>) -> Vec<u16> {
+        let mut inst_buf: Vec<ASTNode> = Vec::new();
+        let mut data_buf: Vec<ASTNode> = Vec::new();
+        for node in &ast_nodes {
+            match node {
+                ASTNode::Machine1wInstruction { label, opcode, r1, r2, comment } => {
+                    inst_buf.push(node.clone());
+                },
+                ASTNode::Machine2wInstruction { label, opcode, r, x, addr, comment } => {
+                    inst_buf.push(node.clone());
+                },
+                ASTNode::AssemblerInstruction { label, opcode, operands, comment } => {
+                    if opcode == assembler_instructions::DC {
+                        data_buf.push(node.clone());
                     }
-                    _ => {
-                        panic!("Unsupported 1w instruction: {}", opcode);
-                    }
-                }
-            },
-            ASTNode::Machine2wInstruction { label, opcode, r, x, addr, comment } => {
-                let opcode = opecode_to_binary(&opcode, true);
-            },
-            ASTNode::AssemblerInstruction { label, opcode, operands, comment } => todo!(),
-            ASTNode::START { label, addr } => todo!(),
-            ASTNode::END => todo!(),
-            ASTNode::EMPTY => todo!(),
+                },
+                ASTNode::START { label, addr } => {
+                    // 何もしない バイナリに必要ない
+                },
+                ASTNode::END => {
+                    // 何もしない バイナリに必要ない
+                },
+                ASTNode::EMPTY => todo!(),
+            }
         }
-        binary
+
+        [12]
     }
 }
