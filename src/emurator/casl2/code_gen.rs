@@ -1,6 +1,6 @@
 use std::collections::{HashMap, VecDeque};
 
-use crate::emurator::{casl2::{parser::ASTNode, prefix::assembler_instructions}, commet2::prefix::opecode_to_binary};
+use crate::emurator::{casl2::{err::Casl2AssemblerError, parser::ASTNode, prefix::assembler_instructions}, commet2::prefix::opecode_to_binary};
 
 
 pub struct MemLine {
@@ -20,8 +20,16 @@ pub struct CodeGenerator {
     pub mem_lines: Vec<MemLine>,
 }
 
+pub struct Routine {
+    pub name: String,
+    pub data_addr: u16,
+    pub program_addr: u16,
+    pub mem_lines: Vec<MemLine>,
+}
+
 impl CodeGenerator {
-    pub fn confirm_addr(ast_nodes: Vec<ASTNode>) -> Vec<u16> {
+    /// ASTNodesからルーチンごとに切り分ける
+    pub fn routine_formatting(ast_nodes: Vec<ASTNode>) -> Result<Vec<Routine>, Casl2AssemblerError> {
         let mut inst_buf: Vec<ASTNode> = Vec::new();
         let mut data_buf: Vec<ASTNode> = Vec::new();
         for node in &ast_nodes {

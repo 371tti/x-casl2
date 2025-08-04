@@ -1,5 +1,6 @@
 pub mod assembler_instructions {
     pub const DC: &str = "DC";
+    pub const DS: &str = "DS";
     pub const START: &str = "START";
     pub const END: &str = "END";
     pub const NOP: &str = "NOP";
@@ -38,6 +39,7 @@ pub const GR_LIST: [&str; 8] = [
 
 pub enum Operation {
     DC(u16, Vec<u16>),
+    DS(u16),
     NOP,
     RET,
     LD1W(u8, u8),

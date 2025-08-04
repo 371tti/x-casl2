@@ -188,7 +188,8 @@ impl CPUExecution for CPU {
             | instruction::w2::JZE
             | instruction::w2::JUMP
             | instruction::w2::JPL
-            | instruction::w2::JOV => {
+            | instruction::w2::JOV
+            | instruction::w2::CALL => {
                 if self.state.decoder_state.r2 == 0 {
                     let gen_addr = self.state.decoder_state.addr;
                     self.state.gen_addr = gen_addr;
@@ -835,6 +836,13 @@ impl CPUExecution for CPU {
                     UpdateNotify::NONE
                 }
             },
+            // instruction::w2::CALL => {
+            //     // MAR から PR へ
+            // スタックにアドレス積んでない！！！！
+            //     self.state.pr = gen_addr;
+            //     self.state.machine_cycle = machine_cycle::FETCH;
+            //     UpdateNotify::PR(self.state.pr)
+            // },
             _ => {
                 println!("Unknown opcode: {}", opcode);
                 self.state.next_cycle();

@@ -78,6 +78,19 @@ impl ASTNode {
                         comment,
                     })
                 },
+                assembler_instructions::DS => {
+                    // アセンブラ命令
+                    let operands: Vec<String> = operand.split(',').map(|s| s.trim().to_string()).collect();
+                    if operands.len() != 1 || !operands[0].parse::<u16>().is_ok() {
+                        return Err(Casl2AssemblerError::AnalyzeError(format!("Invalid DS instruction, line: {}\n\t{}", line_number, str)));
+                    }
+                    Ok(Self::AssemblerInstruction {
+                        label: label.unwrap_or_default(),
+                        opcode,
+                        operands,
+                        comment,
+                    })
+                },
                 assembler_instructions::START => {
                     // START命令
                     let operands: Vec<String> = operand.split(',').map(|s| s.trim().to_string()).collect();
