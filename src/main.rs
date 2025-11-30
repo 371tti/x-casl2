@@ -15,7 +15,6 @@ fn main() {
     write_memory[2] = 0x2410;
     write_memory[3] = 0x6400;
     write_memory[4] = 0x0002;
-    // 必要に応じて他の値もwrite_memory[n] = ...;で追加
     commet2.state.memory.0.copy_from_slice(&write_memory);
     commet2.state.pr = 0x0000; // プログラムレジスタを初期化
     commet2.state.sp = 0x0000; // スタックポイン
