@@ -27,34 +27,34 @@ pub struct Routine {
     pub mem_lines: Vec<MemLine>,
 }
 
-impl CodeGenerator {
-    /// ASTNodesからルーチンごとに切り分ける
-    pub fn routine_formatting(ast_nodes: Vec<ASTNode>) -> Result<Vec<Routine>, Casl2AssemblerError> {
-        let mut inst_buf: Vec<ASTNode> = Vec::new();
-        let mut data_buf: Vec<ASTNode> = Vec::new();
-        for node in &ast_nodes {
-            match node {
-                ASTNode::Machine1wInstruction { label, opcode, r1, r2, comment } => {
-                    inst_buf.push(node.clone());
-                },
-                ASTNode::Machine2wInstruction { label, opcode, r, x, addr, comment } => {
-                    inst_buf.push(node.clone());
-                },
-                ASTNode::AssemblerInstruction { label, opcode, operands, comment } => {
-                    if opcode == assembler_instructions::DC {
-                        data_buf.push(node.clone());
-                    }
-                },
-                ASTNode::START { label, addr } => {
-                    // 何もしない バイナリに必要ない
-                },
-                ASTNode::END => {
-                    // 何もしない バイナリに必要ない
-                },
-                ASTNode::EMPTY => todo!(),
-            }
-        }
+// impl CodeGenerator {
+//     /// ASTNodesからルーチンごとに切り分ける
+//     pub fn routine_formatting(ast_nodes: Vec<ASTNode>) -> Result<Vec<Routine>, Casl2AssemblerError> {
+//         let mut inst_buf: Vec<ASTNode> = Vec::new();
+//         let mut data_buf: Vec<ASTNode> = Vec::new();
+//         for node in &ast_nodes {
+//             match node {
+//                 ASTNode::Machine1wInstruction { label, opcode, r1, r2, comment } => {
+//                     inst_buf.push(node.clone());
+//                 },
+//                 ASTNode::Machine2wInstruction { label, opcode, r, x, addr, comment } => {
+//                     inst_buf.push(node.clone());
+//                 },
+//                 ASTNode::AssemblerInstruction { label, opcode, operands, comment } => {
+//                     if opcode == assembler_instructions::DC {
+//                         data_buf.push(node.clone());
+//                     }
+//                 },
+//                 ASTNode::START { label, addr } => {
+//                     // 何もしない バイナリに必要ない
+//                 },
+//                 ASTNode::END => {
+//                     // 何もしない バイナリに必要ない
+//                 },
+//                 ASTNode::EMPTY => todo!(),
+//             }
+//         }
 
-        [12]
-    }
-}
+//         [12]
+//     }
+// }
