@@ -1,7 +1,12 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, hash::Hash};
 
 use crate::instruction::{Instruction, OpeCode};
 
+/// Assembler
+/// # 仕様
+/// - DCのアドレスにJUMP可能
+/// - 適当なアドレスにJUMP可能
+/// - ルーチン外のDCはMAINルーチンのみで有効
 pub struct Assembler {
 
 }
@@ -179,6 +184,7 @@ impl ASTNode {
         let mut stack = Vec::new();
         let mut line_count = 0;
         let mut is_routine = false;
+        // todo: これ今Globalにラベル管理してるけど、ルーチンラベル以外はLocalで分けるべき
         let mut label_table = LabelTable::new();
         while let Some(token) = token_itr.next() {
             if token == &Lexer::LF && !is_routine{
@@ -261,8 +267,28 @@ impl ASTNode {
     }
 
     pub fn to_bin(nodes: Vec<ASTNode>) -> Vec<u16> {
-        todo!()
-        // リンクとかいろいろしないとー
+        let mut binary = Vec::new();
+        let mut to_link: HashMap<u64, Vec<>
+        for node in nodes {
+            match node {
+                ASTNode::DC { label: _, value } => {
+                    match value {
+                        Expr::Word(w) => binary.push(w),
+                        Expr::Data(d) => binary.extend(d),
+                    }
+                }
+                ASTNode::DS { label: _, size } => {
+                    binary.extend(vec![0; size]);
+                }
+                ASTNode::MAIN { instructions } | ASTNode::SUBROUTINE { name: _, instructions } => {
+                    for instruction in instructions {
+                        let encoded = instruction.encode();
+                        binary.push(encoded);
+                    }
+                }
+            }
+        }
+        binary
     }
 }
 
